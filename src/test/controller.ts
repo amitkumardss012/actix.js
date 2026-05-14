@@ -5,7 +5,7 @@ export function hellow(req: Request, res: Response) {
   return res.json({ message: "Hellow World" });
 }
 
-export function testMiddleware(req: Request, res: Response, next: () => void) {
+export function testMiddleware(req: Request, res: Response) {
   console.log("Middleware");
   return res.json({ message: "Middleware" });
 }
