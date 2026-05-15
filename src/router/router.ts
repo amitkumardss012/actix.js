@@ -4,7 +4,7 @@ import type { Handler, Route } from "../types/types.js";
 export class Router {
   private routes: Route[] = [];
 
-  register(method: HttpMethod, path: string, handlers: Handler) {
+  private register(method: HttpMethod, path: string, handlers: Handler) {
     this.routes.push({ method, path, handlers });
   }
 
