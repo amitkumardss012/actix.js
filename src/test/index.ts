@@ -1,5 +1,5 @@
 import { Sora } from "../core/app.js";
-import { hellow, testMiddleware } from "./controller.js";
+import { hellow } from "./controller.js";
 
 const app = new Sora();
 

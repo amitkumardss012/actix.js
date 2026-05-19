@@ -1,5 +1,4 @@
-import type { HttpMethod } from "../types/types.js";
-import type { Handler, Route } from "../types/types.js";
+import type { HttpMethod, Handler, Route  } from "../types/types.js";
 
 export class Router {
   private routes: Route[] = [];
