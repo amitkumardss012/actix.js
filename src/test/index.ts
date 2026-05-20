@@ -3,6 +3,7 @@ import { Request } from "../http/request.js";
 import { Response } from "../http/response.js";
 import type { NextFunction } from "../types/types.js";
 import { hellow } from "./controller.js";
+import userRouter from "./router.js";
 
 const app = new Sora();
 
@@ -46,7 +47,7 @@ app.post("/api/user/{id}/posts/{postId}", (req, res) => {
   });
 });
 
-// app.use("/api/test", userRouter)
+app.use("/api/test", rateLimit, userRouter)
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

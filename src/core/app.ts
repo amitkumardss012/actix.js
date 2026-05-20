@@ -77,10 +77,13 @@ export class Sora {
       };
 
       await next();
+      if (!res.writableEnded) {
+        response.status(404).json({ error: "Route not found" });
+      }
     });
   }
 
-  use(pathOrHandler: string | Handler, ...handlers: Handler[]) {
+  use(pathOrHandler: string | Handler | Router, ...handlers: (Handler | Router)[]) {
     this.router.use(pathOrHandler, ...handlers);
   }
 

@@ -9,11 +9,42 @@ export class Router {
     this.routes.push({ method, path, handlers });
   }
 
-  use(pathOrHandler: string | Handler, ...handlers: Handler[]) {
+  use(pathOrHandler: string | Handler | Router, ...handlers: (Handler | Router)[]) {
+    let path = "/";
+    let actualHandlers: (Handler | Router)[] = [];
+
     if (typeof pathOrHandler === "string") {
-      this.middlewares.push({ path: pathOrHandler, handlers });
+      path = pathOrHandler;
+      actualHandlers = handlers;
     } else {
-      this.middlewares.push({ path: "/", handlers: [pathOrHandler, ...handlers] });
+      actualHandlers = [pathOrHandler, ...handlers];
+    }
+
+    for (const h of actualHandlers) {
+      if (h instanceof Router) {
+        // Merge routes from sub-router into this router
+        for (const route of h.routes) {
+          let joinedPath = "";
+          if (path === "/") {
+            joinedPath = route.path;
+          } else {
+            joinedPath = path + (route.path === "/" ? "" : route.path);
+          }
+          this.register(route.method, joinedPath, route.handlers);
+        }
+        // Merge middlewares from sub-router into this router
+        for (const mw of h.middlewares) {
+          let joinedPath = "";
+          if (path === "/") {
+            joinedPath = mw.path;
+          } else {
+            joinedPath = path + (mw.path === "/" ? "" : mw.path);
+          }
+          this.middlewares.push({ path: joinedPath, handlers: mw.handlers });
+        }
+      } else {
+        this.middlewares.push({ path, handlers: [h] });
+      }
     }
   }
 
