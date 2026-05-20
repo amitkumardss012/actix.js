@@ -1,18 +1,37 @@
 {
-  "name": "intro",
+  "name": "actix",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
     "build": "tsc -p .",
-    "dev": "bun --watch src/test/index.ts"
+    "dev": "tsc-watch --onSuccess \"node dist/index.js\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "framework",
+    "web",
+    "server",
+    "http",
+    "router",
+    "middleware",
+    "handler",
+    "request",
+    "response",
+    "types",
+    "cookie",
+    "error",
+    "next",
+    "route"
+  ],
+  "author": "amit kumar",
+  "license": "MIT",
+  "description": "A fast and easy-to-use web server framework for Node.js",
   "devDependencies": {
     "@types/node": "^25.7.0",
     "tsc-watch": "^7.2.0",
