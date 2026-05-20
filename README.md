@@ -131,10 +131,8 @@ Runs for every incoming request:
 
 ```typescript
 app.use(async (req, res, next) => {
-  const start = Date.now();
-  await next(); // Proceed down the chain
-  const duration = Date.now() - start;
-  console.log(`[${req.method}] ${req.path} - ${duration}ms`);
+  console.log(`${req.method} ${req.url}`)
+  await next()
 });
 ```
 
