@@ -1,11 +1,12 @@
-import { Sora } from "../core/app.js";
+
+import { Actix } from "../core/app.js";
 import { Request } from "../http/request.js";
 import { Response } from "../http/response.js";
 import type { NextFunction } from "../types/types.js";
 import { hellow } from "./controller.js";
 import userRouter from "./router.js";
 
-const app = new Sora();
+const app = new Actix();
 
 // Global middleware
 app.use(async (req: Request, res: Response, next: NextFunction) => {

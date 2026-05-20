@@ -4,7 +4,7 @@ import { Response } from "../http/response.js";
 import { Router } from "../router/router.js";
 import type { Handler } from "../types/types.js";
 
-export class Sora {
+export class Actix {
   private server;
   private router = new Router();
 
