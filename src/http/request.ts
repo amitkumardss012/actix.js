@@ -25,5 +25,9 @@ export class Request {
     }
     return queryObj;
   }
+
+  getCookie(name: string) {
+    return this.raw.headers.cookie?.split(";").find((cookie) => cookie.startsWith(`${name}=`));
+  }
 }
 

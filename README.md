@@ -229,7 +229,7 @@ app.listen(3000);
 
 ### Request Object
 
-| Property | Type | Description |
+| Property / Method | Type / Signature | Description |
 | :--- | :--- | :--- |
 | `raw` | `IncomingMessage` | Raw Node.js incoming request object. |
 | `method` | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | The HTTP request method. |
@@ -238,6 +238,7 @@ app.listen(3000);
 | `query` | `Record<string, string>` | Parsed query parameters. |
 | `params` | `Record<string, string>` | Parsed dynamic route parameters. |
 | `body` | `any` | Parsed request body object. |
+| `getCookie` | `getCookie(name: string)` | Retrieves the raw cookie string value for the given cookie name. |
 
 ### Response Object
 
