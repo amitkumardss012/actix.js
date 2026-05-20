@@ -1,4 +1,5 @@
 import type { HttpMethod, Handler, Route, Middleware } from "../types/types.js";
+import type { Request } from "../http/request.js";
 
 export class Router {
   private routes: Route[] = [];
@@ -16,7 +17,7 @@ export class Router {
     }
   }
 
-  getHandlers(method: HttpMethod, path: string = "/"): Handler[] {
+  getHandlers(method: HttpMethod, path: string = "/", request?: Request): Handler[] {
     const matchedHandlers: Handler[] = [];
 
     // Match global/path-specific middlewares
@@ -27,12 +28,45 @@ export class Router {
     }
 
     // Match route specific handlers
-    const route = this.routes.find(
-      (r) => r.method === method && r.path === path,
-    );
+    let matchedRoute: Route | undefined;
+    let params: Record<string, string> = {};
 
-    if (route) {
-      matchedHandlers.push(...route.handlers);
+    for (const r of this.routes) {
+      if (r.method !== method) continue;
+
+      const routeSegments = r.path.split("/");
+      const pathSegments = path.split("/");
+
+      if (routeSegments.length !== pathSegments.length) continue;
+
+      let matched = true;
+      const routeParams: Record<string, string> = {};
+
+      for (let i = 0; i < routeSegments.length; i++) {
+        const routeSeg = routeSegments[i] || "";
+        const pathSeg = pathSegments[i] || "";
+
+        if (routeSeg.startsWith("{") && routeSeg.endsWith("}")) {
+          const paramName = routeSeg.slice(1, -1);
+          routeParams[paramName] = decodeURIComponent(pathSeg);
+        } else if (routeSeg !== pathSeg) {
+          matched = false;
+          break;
+        }
+      }
+
+      if (matched) {
+        matchedRoute = r;
+        params = routeParams;
+        break;
+      }
+    }
+
+    if (matchedRoute) {
+      if (request) {
+        request.params = params;
+      }
+      matchedHandlers.push(...matchedRoute.handlers);
     }
 
     return matchedHandlers;
@@ -58,3 +92,4 @@ export class Router {
     this.register("PATCH", path, handlers);
   }
 }
+

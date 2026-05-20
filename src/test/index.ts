@@ -3,13 +3,12 @@ import { Request } from "../http/request.js";
 import { Response } from "../http/response.js";
 import type { NextFunction } from "../types/types.js";
 import { hellow } from "./controller.js";
-import userRouter from "./router.js";
 
 const app = new Sora();
 
 // Global middleware
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-  console.log(`[Global] Request to ${req.path}`);
+  console.log(`[Global] Requestsss to ${req.path}`);
   await next();
 });
 
@@ -39,8 +38,15 @@ app.get("/", hellow);
 app.get("/api/user", (req, res) => res.json({ user: "amit" }));
 app.post("/api/create", rateLimit, isPremium, createPost);
 
+app.post("/api/user/{id}/posts/{postId}", (req, res) => {
+  res.json({
+    params: req.params,
+    query: req.query,
+    body: req.body
+  });
+});
 
-app.use("/api/test", userRouter)
+// app.use("/api/test", userRouter)
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
     "build": "tsc -p .",
-    "dev": "tsc-watch --onSuccess \"node --watch ./public/index.js\""
+    "dev": "bun --watch src/test/index.ts"
   },
   "keywords": [],
   "author": "",

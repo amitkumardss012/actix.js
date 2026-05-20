@@ -13,7 +13,42 @@ export class Sora {
       const request = new Request(req);
       const response = new Response(res);
 
-      const handlers = this.router.getHandlers(request.method as any, request.path);
+      // Parse body asynchronously
+      await new Promise<void>((resolve) => {
+        let bodyData = "";
+        req.on("data", (chunk) => {
+          bodyData += chunk;
+        });
+        req.on("end", () => {
+          if (bodyData) {
+            const contentType = req.headers["content-type"] || "";
+            if (contentType.includes("application/json")) {
+              try {
+                request.body = JSON.parse(bodyData);
+              } catch (e) {
+                request.body = bodyData;
+              }
+            } else if (contentType.includes("application/x-www-form-urlencoded")) {
+              try {
+                request.body = Object.fromEntries(new URLSearchParams(bodyData));
+              } catch (e) {
+                request.body = bodyData;
+              }
+            } else {
+              request.body = bodyData;
+            }
+          } else {
+            request.body = {};
+          }
+          resolve();
+        });
+        req.on("error", () => {
+          request.body = {};
+          resolve();
+        });
+      });
+
+      const handlers = this.router.getHandlers(request.method, request.path, request);
 
       if (handlers.length === 0) {
         response.status(404).json({ error: "Route not found" });
