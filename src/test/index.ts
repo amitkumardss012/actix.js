@@ -1,45 +1,47 @@
 import { Sora } from "../core/app.js";
-import {
-  logger,
-  cors,
-  auth,
-  isApproved,
-  rateLimit,
-  isPremium,
-  hellow,
-  createPost,
-} from "./controller.js";
+import { Request } from "../http/request.js";
+import { Response } from "../http/response.js";
+import type { NextFunction } from "../types/types.js";
+import { hellow } from "./controller.js";
 import userRouter from "./router.js";
 
 const app = new Sora();
 
-// ─── Global middleware — runs on EVERY request ─────────────────────────
-app.use(logger);
-app.use(cors);
+// Global middleware
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`[Global] Request to ${req.path}`);
+  await next();
+});
 
-// ─── Path-scoped middleware with sub-router ────────────────────────────
-// Requests to /api/user/* will go through:
-//   logger → cors → auth → isApproved → userRouter
-app.use("/api/user", auth, isApproved, userRouter);
+// Path-specific middleware
+app.use("/api", async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`[API] Path-specific middleware for /api`);
+  await next();
+});
 
-// ─── Route with inline middleware ──────────────────────────────────────
-// GET /create will go through:
-//   logger → cors → rateLimit → isPremium → createPost
-app.get("/create", rateLimit, isPremium, createPost);
+// Route-specific middlewares
+const rateLimit = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`[RateLimit] Checking limits...`);
+  await next();
+};
 
-// ─── Simple route (no extra middleware) ────────────────────────────────
-// GET / will go through:
-//   logger → cors → hellow
+const isPremium = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`[Premium] Checking premium status...`);
+  await next();
+};
+
+const createPost = async (req: Request, res: Response) => {
+  console.log(`[Controller] createPost executed`);
+  res.json({ success: true, message: "Post created!" });
+};
+
 app.get("/", hellow);
+app.get("/api/user", (req, res) => res.json({ user: "amit" }));
+app.post("/api/create", rateLimit, isPremium, createPost);
 
-// ─── Start server ─────────────────────────────────────────────────────
+
+app.use("/api/test", userRouter)
+
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
-  console.log("");
-  console.log("Try these routes:");
-  console.log("  GET http://localhost:3000/              → global MW → hellow");
-  console.log("  GET http://localhost:3000/create        → global MW → rateLimit → isPremium → createPost");
-  console.log("  GET http://localhost:3000/api/user      → global MW → auth → isApproved → getUsers");
-  console.log("  GET http://localhost:3000/api/user/profile → global MW → auth → isApproved → getProfile");
-  console.log("  GET http://localhost:3000/nonexistent   → global MW → 404");
 });

@@ -1,9 +1,9 @@
 import { Router } from "../router/router.js";
-import { getProfile, getUsers } from "./controller.js";
 
 const userRouter = new Router();
 
-userRouter.get("/profile", getProfile);
-userRouter.get("/", getUsers);
+userRouter.get("/home", (req, res) => {
+    return res.send("Hellow from user router");
+});
 
 export default userRouter;

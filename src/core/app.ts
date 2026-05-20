@@ -2,7 +2,7 @@ import http from "node:http";
 import { Request } from "../http/request.js";
 import { Response } from "../http/response.js";
 import { Router } from "../router/router.js";
-import type { Middleware, Handler, ErrorHandler } from "../types/types.js";
+import type { Handler } from "../types/types.js";
 
 export class Sora {
   private server;
@@ -13,84 +13,64 @@ export class Sora {
       const request = new Request(req);
       const response = new Response(res);
 
-      // Delegate the entire request to the router's middleware stack.
-      // The `done` callback is the final fallback — if no middleware/route
-      // has handled the request, respond with 404.
-      this.router.handle(request, response, (err?: unknown) => {
-        if (response.raw.writableEnded) return;
+      const handlers = this.router.getHandlers(request.method as any, request.path);
 
+      if (handlers.length === 0) {
+        response.status(404).json({ error: "Route not found" });
+        return;
+      }
+
+      let index = 0;
+      const next = async (err?: any) => {
         if (err) {
-          const statusCode = typeof err === "object" && err !== null && "statusCode" in err
-            ? (err as { statusCode: number }).statusCode
-            : 500;
-          const message = err instanceof Error ? err.message : "Internal Server Error";
-          response.status(statusCode).json({ error: message });
+          response.status(500).json({ error: err.message || "Internal Server Error" });
           return;
         }
 
-        response.status(404).json({ error: "Route not found" });
-      });
+        if (index < handlers.length) {
+          const handler = handlers[index++];
+          if (handler) {
+            try {
+              await handler(request, response, next);
+            } catch (e) {
+              next(e);
+            }
+          } else {
+            await next();
+          }
+        }
+      };
+
+      await next();
     });
   }
 
-  // -----------------------------------------------------------------------
-  // Middleware registration — app.use()
-  // -----------------------------------------------------------------------
-
-  /**
-   * Register global or path-scoped middleware.
-   *
-   *   app.use(logger)                        — global middleware
-   *   app.use(logger, cors)                  — multiple global middleware
-   *   app.use("/api/user", auth, userRouter) — path-scoped + sub-router
-   */
-  use(path: string, ...handlers: Array<Middleware | Handler | Router>): void;
-  use(...handlers: Array<Middleware | Handler | Router>): void;
-  use(
-    first: string | Middleware | Handler | Router,
-    ...rest: Array<Middleware | Handler | Router>
-  ): void {
-    if (typeof first === "string") {
-      this.router.use(first, ...rest);
-    } else {
-      this.router.use(first, ...rest);
-    }
+  use(pathOrHandler: string | Handler, ...handlers: Handler[]) {
+    this.router.use(pathOrHandler, ...handlers);
   }
 
-  // -----------------------------------------------------------------------
-  // HTTP route methods — variadic middleware support
-  // -----------------------------------------------------------------------
-
-  /**
-   *   app.get("/path", handler)
-   *   app.get("/path", mw1, mw2, handler)
-   */
-  get(path: string, ...handlers: Array<Middleware | Handler>) {
+  get(path: string, ...handlers: Handler[]) {
     this.router.get(path, ...handlers);
   }
 
-  post(path: string, ...handlers: Array<Middleware | Handler>) {
+  post(path: string, ...handlers: Handler[]) {
     this.router.post(path, ...handlers);
   }
 
-  put(path: string, ...handlers: Array<Middleware | Handler>) {
+  put(path: string, ...handlers: Handler[]) {
     this.router.put(path, ...handlers);
   }
 
-  delete(path: string, ...handlers: Array<Middleware | Handler>) {
+  delete(path: string, ...handlers: Handler[]) {
     this.router.delete(path, ...handlers);
   }
 
-  patch(path: string, ...handlers: Array<Middleware | Handler>) {
+  patch(path: string, ...handlers: Handler[]) {
     this.router.patch(path, ...handlers);
   }
 
-  // -----------------------------------------------------------------------
-  // Server lifecycle
-  // -----------------------------------------------------------------------
-
   listen(port: number, callback?: () => void) {
-    console.log("thanks for using sora build by amit kumar yadav");
+    console.log("thanks for using sora build by amit kumar yadav")
     this.server.listen(port, callback);
   }
 }

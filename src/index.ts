@@ -6,10 +6,11 @@ export { Response } from "./http/response.js";
 export type {
   HttpMethod,
   CookieOptions,
-  Middleware,
-  NextFunction,
   Handler,
   ErrorHandler,
+  NextFunction,
+  Middleware,
+  Route,
 } from "./types/types.js";
 
 export default Sora;
